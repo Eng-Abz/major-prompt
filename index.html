@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>برومبت استكشاف التخصصات</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Reem+Kufi:wght@600&display=swap">
+<style>
+/* Layout: single narrow column for phones; two fill-in fields on top, the prompt sheet below, copy bar fixed at the bottom. */
+:root{
+  --bg:#f3f6f5; --sheet:#ffffff; --fg:#14282b; --muted:#5a6f71; --line:#d5dfdd;
+  --accent:#0b6b63; --on-accent:#ffffff; --mark:#fff1bf; --mark-fg:#4a3a00;
+  --display:"Reem Kufi","IBM Plex Sans Arabic",Tahoma,sans-serif;
+  --body:"IBM Plex Sans Arabic",Tahoma,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1a1b; --sheet:#16272a; --fg:#e6efed; --muted:#9db1b0; --line:#2b4144;
+  --accent:#4fc4b6; --on-accent:#062422; --mark:#5a4a12; --mark-fg:#ffe9a3; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1a1b; --sheet:#16272a; --fg:#e6efed; --muted:#9db1b0; --line:#2b4144;
+  --accent:#4fc4b6; --on-accent:#062422; --mark:#5a4a12; --mark-fg:#ffe9a3; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.8;padding-inline:16px;padding-block:28px 110px}
+main{max-width:680px;margin-inline:auto;display:flex;flex-direction:column;gap:22px}
+h1{font-family:var(--display);font-size:1.75rem;line-height:1.35;margin:0;text-wrap:balance}
+.lead{margin:6px 0 0;color:var(--muted)}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.fields .wide{grid-column:1/-1}
+label{display:flex;flex-direction:column;gap:4px;font-size:.875rem;font-weight:500;color:var(--muted);min-width:0}
+input,select{font:inherit;font-size:1rem;color:var(--fg);background:var(--sheet);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%}
+#code{direction:ltr;text-align:center;letter-spacing:.3em;font-weight:600;text-transform:uppercase}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h2{font-size:.875rem;font-weight:600;color:var(--muted);margin:0}
+#prompt{background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:18px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.95rem;margin:0;font-family:var(--body)}
+#prompt mark{background:var(--mark);color:var(--mark-fg);padding:1px 6px;border-radius:4px;font-weight:600}
+.bar{position:fixed;inset-inline:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))}
+.bar div{max-width:680px;margin-inline:auto}
+button{font:inherit;font-weight:600;font-size:1.05rem;width:100%;border:0;border-radius:10px;padding:14px;background:var(--accent);color:var(--on-accent);cursor:pointer}
+body{margin:0}
+</style>
+</head>
+<body>
+
+<main dir="rtl" lang="ar">
+  <header>
+    <h1>برومبت استكشاف التخصصات الجامعية</h1>
+    <p class="lead">اكتب كود هولاند واختر أعلى ثلاثة ذكاءات عندك، ثم انسخ النص والصقه في أي مساعد ذكاء اصطناعي.</p>
+  </header>
+
+  <section class="fields" aria-label="بياناتك">
+    <label class="wide">كود هولاند (ثلاثة أحرف بالترتيب)
+      <input id="code" maxlength="3" placeholder="RCI" autocomplete="off" autocapitalize="characters" inputmode="text">
+    </label>
+    <label>الذكاء الأول <select id="i1"></select></label>
+    <label>الذكاء الثاني <select id="i2"></select></label>
+    <label>الذكاء الثالث <select id="i3"></select></label>
+  </section>
+
+  <section>
+    <h2>النص الذي سيُنسخ</h2>
+    <pre id="prompt" dir="rtl"></pre>
+  </section>
+</main>
+
+<div class="bar" dir="rtl"><div><button id="copy" type="button">نسخ النص</button></div></div>
+
+<script>
+const INTS=["اللغوي","المنطقي الرياضي","البصري المكاني","الجسمي الحركي","الموسيقي","الاجتماعي","الذاتي","الطبيعي"];
+const TEMPLATE=`أنا طالب في المرحلة الثانوية أستعد لاختيار تخصصي الجامعي، وأحتاج إلى مساعدتك في استكشاف التخصصات التي قد تتوافق مع ميولي وقدراتي.
+كود هولاند الخاص بي هو: {{CODE}}
+أعلى ذكاءاتي هي: {{INTS}}
+
+بناءً على هذه المعطيات، اقترح لي 15 تخصصًا جامعيًا تتوافق بدرجات متفاوتة مع هذا المزيج من الميول والقدرات.
+أريدك أن تقدم الإجابة في جدول يحتوي حصراً على الأعمدة الخمسة التالية:
+التخصص | الحرف | الذكاء | كيف ينعكس ميلي في هذا التخصص؟ | كيف تنعكس قدرتي في هذا التخصص؟
+
+تعليمات الإجابة:
+1. التخصص:
+اذكر اسم التخصص الجامعي بشكل واضح ومحدد، واختر تخصصات متنوعة قدر الإمكان، ولا تحصر الاقتراحات في مجال واحد.
+2. الحرف:
+حدد حرفًا واحدًا أو أكثر من حروف كود هولاند التي أدخلتها فقط، على أن تكون هي الأكثر ارتباطًا بطبيعة التخصص.
+3. الذكاء:
+حدد ذكاءً واحدًا أو أكثر من الذكاءات التي أدخلتها فقط، على أن يكون استخدامه واضحًا في دراسة التخصص أو ممارسته المهنية.
+4. كيف ينعكس ميلي في هذا التخصص؟
+اشرح باختصار وبشكل موضوعي طبيعة المهام والأنشطة وبيئة الدراسة أو العمل في هذا التخصص التي ترتبط بحرف هولاند المختار.
+5. كيف تنعكس قدرتي في هذا التخصص؟
+اشرح باختصار وبشكل موضوعي المهارات والمتطلبات الدراسية أو المهنية في التخصص التي تعتمد على الذكاء المختار.
+
+مراعاة ترتيب الميول والذكاءات:
+اعتبر ترتيب حروف كود هولاند مهمًا؛ فالحرف الأول يمثل الميل الأعلى، والثاني الميل التالي، والثالث الميل الثالث.
+اعتبر ترتيب الذكاءات مهمًا بالطريقة نفسها؛ فالذكاء الأول هو الأعلى، يليه الثاني، ثم الثالث.
+أعطِ أولوية أكبر للحرف والذكاء الأولين عند اختيار التخصصات، ولكن لا تهمل الحرف الثالث أو الذكاء الثالث.
+يجب أن تتضمن قائمة التخصصات تخصصات ترتبط بالحرف الأول، وأخرى بالحرف الثاني، وأخرى بالحرف الثالث، وكذلك بالنسبة للذكاءات الثلاثة.
+نوّع بين التركيبات الممكنة لحروف هولاند، ولا تجعل جميع التخصصات مرتبطة بنفس الحرف أو نفس الحرفين. فمثلًا إذا كان الكود RCI يمكن أن تظهر تخصصات مرتبطة بـ R، C، I، RC، RI، CI، RCI بحسب طبيعة كل تخصص.
+لا يشترط أن يجمع كل تخصص الحروف الثلاثة أو الذكاءات الثلاثة؛ قد يرتبط تخصص بحرف واحد وذكاء واحد، بينما يرتبط تخصص آخر بحرفين وذكاءين أو أكثر.
+احرص على أن يظهر كل حرف من حروف هولاند الثلاثة في عدة اقتراحات، وأن يظهر كل ذكاء من الذكاءات الثلاثة في عدة اقتراحات، حتى يحصل الطالب على خيارات تعكس جوانب مختلفة من ملفه.
+لا تستخدم الحرف الثالث أو الذكاء الثالث بصورة مصطنعة لمجرد تحقيق التنوع؛ يجب أن تكون العلاقة بينه وبين التخصص حقيقية وقابلة للتفسير.
+لا ترتب جميع التخصصات بناءً على الحرف الأول وحده؛ المطلوب استكشاف مساحة واسعة من التخصصات الناتجة عن التداخل بين الميول الثلاثة والذكاءات الثلاثة.
+عند وجود تخصص يرتبط بالحرف الثاني أو الثالث بقوة أكبر من الحرف الأول، أدرجه ضمن الاقتراحات حتى لو لم يرتبط بالحرف الأول.
+
+ضوابط مهمة جدًا:
+لا تستخدم صيغة المتكلم في العمودين الرابع والخامس، مثل: «لأنني أحب»، «لأنني أجيد»، «لأنني أستمتع».
+لا تفترض صفات أو اهتمامات لم تُذكر في البيانات المدخلة.
+لا تقل إن التخصص «مناسب لي» أو «غير مناسب لي»، وإنما صف طبيعة التخصص وعلاقته بالميول والقدرات، واترك لي تقييم مدى انطباق ذلك عليّ.
+لا تعتمد على اسم التخصص فقط؛ اربط الاختيار بمهامه الفعلية وطبيعة دراسته وممارسته المهنية.
+لا تستخدم أي حرف من هولاند أو نوع من الذكاءات غير موجود في البيانات التي أدخلتها.
+اجعل الشرح واضحًا ومناسبًا لطالب في المرحلة الثانوية، وتجنب المصطلحات المعقدة قدر الإمكان.
+لا تضف أي أعمدة أو نصوص أو مقدمات أو خاتمة خارج الجدول.`;
+
+const $=id=>document.getElementById(id);
+const code=$("code"), sels=[$("i1"),$("i2"),$("i3")], out=$("prompt"), btn=$("copy");
+sels.forEach(s=>{s.innerHTML='<option value="">اختر</option>'+INTS.map(i=>`<option>${i}</option>`).join("")});
+
+function values(){
+  const c=code.value.toUpperCase().replace(/[^RIASEC]/g,"");
+  const ints=sels.map(s=>s.value).filter(Boolean);
+  return {c:c||"###", i:ints.length?ints.join("، "):"*********"};
+}
+function text(){const v=values();return TEMPLATE.replace("{{CODE}}",v.c).replace("{{INTS}}",v.i)}
+function render(){
+  const v=values(), esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  out.innerHTML=esc(TEMPLATE).replace("{{CODE}}",`<mark dir="ltr">${v.c}</mark>`).replace("{{INTS}}",`<mark>${v.i}</mark>`);
+}
+code.addEventListener("input",()=>{code.value=code.value.toUpperCase().replace(/[^RIASEC]/g,"");render()});
+sels.forEach(s=>s.addEventListener("change",render));
+btn.addEventListener("click",async()=>{
+  let ok=true;
+  try{await navigator.clipboard.writeText(text())}
+  catch(e){ok=false;const r=document.createRange();r.selectNodeContents(out);const s=getSelection();s.removeAllRanges();s.addRange(r);
+    try{ok=document.execCommand("copy")}catch(_){}}
+  btn.textContent=ok?"تم النسخ ✓":"النص محدد، انسخه يدويًا";
+  setTimeout(()=>btn.textContent="نسخ النص",2500);
+});
+render();
+</script>
+
+</body>
+</html>
